@@ -36,6 +36,7 @@
 #include <ui/Cursor.h>
 #include <ui/DropEvent.h>
 #include <ui/FileDialog.h>
+#include <ui/FileDialogEvent.h>
 #include <ui/Gamepad.h>
 #include <ui/GamepadEvent.h>
 #include <ui/Haptic.h>
@@ -823,7 +824,6 @@ namespace lime {
 
 	}
 
-
 	HL_PRIM vbyte* HL_NAME(hl_file_dialog_open_directory) (hl_vstring* title, hl_vstring* filter, hl_vstring* defaultPath) {
 
 		#ifdef LIME_TINYFILEDIALOGS
@@ -1055,6 +1055,44 @@ namespace lime {
 
 		return NULL;
 
+	}
+
+	void lime_file_dialog_manager_register_ios (value callback, value eventObject) {
+
+		#ifdef IPHONE
+		FileDialogEvent::callback = new ValuePointer (callback);
+		FileDialogEvent::eventObject = new ValuePointer (eventObject);
+		System::EnableDeviceOrientationChange(true);
+		#endif
+
+	}
+
+	int lime_file_dialog_create_ios() {
+
+		#ifdef IPHONE
+		return FileDialog::Create();
+		#else
+		return -1;
+		#endif
+
+	}
+
+	void lime_file_dialog_open_ios(int id) {
+		#ifdef IPHONE
+		FileDialog::Open(id);
+		#endif
+	}
+
+	void lime_file_dialog_browse_select_ios(int id) {
+		#ifdef IPHONE
+		FileDialog::BrowseSelect(id);
+		#endif
+	}
+
+	void lime_file_dialog_browse_select_multiple_ios(int id) {
+		#ifdef IPHONE
+		FileDialog::BrowseSelectMultiple(id);
+		#endif
 	}
 
 
@@ -4248,6 +4286,11 @@ namespace lime {
 	DEFINE_PRIME3 (lime_file_dialog_open_file);
 	DEFINE_PRIME3 (lime_file_dialog_open_files);
 	DEFINE_PRIME3 (lime_file_dialog_save_file);
+	DEFINE_PRIME2v (lime_file_dialog_manager_register_ios);
+	DEFINE_PRIME0 (lime_file_dialog_create_ios);
+	DEFINE_PRIME1v (lime_file_dialog_open_ios);
+	DEFINE_PRIME1v (lime_file_dialog_browse_select_ios);
+	DEFINE_PRIME1v (lime_file_dialog_browse_select_multiple_ios);
 	DEFINE_PRIME1 (lime_file_watcher_create);
 	DEFINE_PRIME3 (lime_file_watcher_add_directory);
 	DEFINE_PRIME2v (lime_file_watcher_remove_directory);

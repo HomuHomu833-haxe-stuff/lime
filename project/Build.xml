@@ -309,6 +309,8 @@
 		<file name="src/ui/DropEvent.cpp" />
 		<file name="src/ui/GamepadEvent.cpp" />
 		<file name="src/ui/Haptic.mm" if="ios" />
+		<file name="src/ui/FileDialog.mm" if="ios" />
+		<file name="src/ui/FileDialogEvent.cpp" if="ios" />
 		<file name="src/ui/JoystickEvent.cpp" />
 		<file name="src/ui/KeyEvent.cpp" />
 		<file name="src/ui/MouseEvent.cpp" />
@@ -445,6 +447,7 @@
 
 				<vflag name="-l" value="iconv" />
 				<vflag name="-framework" value="IOKit" />
+				<vflag name="-framework" value="UniformTypeIdentifiers" />
 				<vflag name="-framework" value="Foundation" />
 				<vflag name="-framework" value="CoreAudio" />
 				<vflag name="-framework" value="CoreVideo" />
@@ -484,6 +487,7 @@
 			<section if="tvos">
 
 				<vflag name="-framework" value="UIKit" />
+				<vflag name="-framework" value="UniformTypeIdentifiers" />
 				<vflag name="-framework" value="Foundation" />
 				<vflag name="-framework" value="CoreAudio" />
 				<vflag name="-framework" value="CoreVideo" />
@@ -503,6 +507,7 @@
 			<section if="ios">
 
 				<vflag name="-framework" value="UIKit" />
+				<vflag name="-framework" value="UniformTypeIdentifiers" />
 				<vflag name="-framework" value="Foundation" />
 				<vflag name="-framework" value="CoreAudio" />
 				<vflag name="-framework" value="CoreVideo" />
