@@ -20,6 +20,10 @@
 #include <efsw/Debug.hpp>
 #include <efsw/Lock.hpp>
 
+#include <sys/select.h>
+#include <sys/time.h>
+
+
 #define BUFF_SIZE ((sizeof(struct inotify_event)+FILENAME_MAX)*1024)
 
 namespace efsw

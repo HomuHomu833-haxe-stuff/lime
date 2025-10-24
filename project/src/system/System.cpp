@@ -9,6 +9,9 @@
 
 #include <system/System.h>
 
+#ifndef __NFDBITS
+#define __NFDBITS (8 * sizeof(unsigned long))
+#endif
 
 namespace lime {
 
