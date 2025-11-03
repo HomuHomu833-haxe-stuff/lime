@@ -8,11 +8,12 @@
  * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
  *                                                                  *
  * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2015             *
- * by the Xiph.Org Foundation https://xiph.org/                     *
+ * by the Xiph.Org Foundation http://www.xiph.org/                  *
  *                                                                  *
  ********************************************************************
 
  function: #ifdef jail to whip a few platforms into the UNIX ideal.
+ last mod: $Id: os.h 19457 2015-03-03 00:15:29Z giles $
 
  ********************************************************************/
 
@@ -30,7 +31,7 @@
 
 #  ifdef __GNUC__
 #    define STIN static __inline__
-#  elif defined(_WIN32)
+#  elif _WIN32
 #    define STIN static __inline
 #  else
 #    define STIN static
@@ -45,6 +46,7 @@
 #endif
 
 #if defined(_WIN32) && !defined(__SYMBIAN32__)
+#	pragma warning(disable:4244)
 #  include <malloc.h>
 #  define rint(x)   (floor((x)+0.5f))
 #  define NO_FLOAT_MATH_LIB
@@ -60,7 +62,7 @@ void *_alloca(size_t size);
 #  define FAST_HYPOT hypot
 #endif
 
-#endif /* _V_IFDEFJAIL_H_ */
+#endif
 
 #ifdef HAVE_ALLOCA_H
 #  include <alloca.h>
@@ -80,7 +82,7 @@ void *_alloca(size_t size);
 
 
 /* Special i386 GCC implementation */
-#if defined(__i386__) && defined(__GNUC__) && !defined(__BEOS__) && !defined(__SSE2_MATH__)
+#if defined(__i386__) && defined(__GNUC__) && !defined(__BEOS__)
 #  define VORBIS_FPU_CONTROL
 /* both GCC and MSVC are kinda stupid about rounding/casting to int.
    Because of encapsulation constraints (GCC can't see inside the asm
@@ -119,7 +121,8 @@ static inline int vorbis_ftoi(double f){  /* yes, double!  Otherwise,
 
 /* MSVC inline assembly. 32 bit only; inline ASM isn't implemented in the
  * 64 bit compiler and doesn't work on arm. */
-#if defined(_MSC_VER) && defined(_M_IX86) && !defined(_WIN32_WCE)
+#if defined(_MSC_VER) && !defined(_WIN64) && \
+      !defined(_WIN32_WCE) && !defined(_M_ARM)
 #  define VORBIS_FPU_CONTROL
 
 typedef ogg_int16_t vorbis_fpu_control;
@@ -146,7 +149,7 @@ static __inline void vorbis_fpu_restore(vorbis_fpu_control fpu){
 
 /* Optimized code path for x86_64 builds. Uses SSE2 intrinsics. This can be
    done safely because all x86_64 CPUs supports SSE2. */
-#if (defined(_MSC_VER) && defined(_M_X64)) || (defined(__GNUC__) && defined (__SSE2_MATH__))
+#if (defined(_MSC_VER) && defined(_WIN64)) || (defined(__GNUC__) && defined (__x86_64__))
 #  define VORBIS_FPU_CONTROL
 
 typedef ogg_int16_t vorbis_fpu_control;

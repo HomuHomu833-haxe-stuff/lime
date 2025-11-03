@@ -146,6 +146,19 @@ class LinuxPlatform extends PlatformTarget
 		{
 			targetType = "hl";
 			is64 = true;
+			var hlVer = project.haxedefs.get("hl-ver");
+			if (hlVer == null)
+			{
+				var hlPath = project.defines.get("HL_PATH");
+				if (hlPath == null)
+				{
+					// Haxe's default target version for HashLink may be
+					// different (newer even) than the build of HashLink that
+					// is bundled with Lime. if using Lime's bundled HashLink,
+					// set hl-ver to the correct version
+					project.haxedefs.set("hl-ver", HashlinkHelper.BUNDLED_HL_VER);
+				}
+			}
 		}
 		else if (project.targetFlags.exists("nodejs"))
 		{
@@ -160,7 +173,13 @@ class LinuxPlatform extends PlatformTarget
 			targetType = "cpp";
 		}
 
-		targetDirectory = Path.combine(project.app.path, project.config.getString("linux.output-directory", targetType == "cpp" ? "linux" : targetType));
+		var defaultTargetDirectory = switch (targetType)
+		{
+			case "cpp": "linux";
+			case "hl": project.targetFlags.exists("hlc") ? "hlc" : targetType;
+			default: targetType;
+		}
+		targetDirectory = Path.combine(project.app.path, project.config.getString("linux.output-directory", defaultTargetDirectory));
 		targetDirectory = StringTools.replace(targetDirectory, "arch64", is64 ? "64" : "");
 		applicationDirectory = targetDirectory + "/bin/";
 		executablePath = Path.combine(applicationDirectory, project.app.file);
@@ -216,6 +235,24 @@ class LinuxPlatform extends PlatformTarget
 			if (noOutput) return;
 
 			HashlinkHelper.copyHashlink(project, targetDirectory, applicationDirectory, executablePath, is64);
+
+			if (project.targetFlags.exists("hlc"))
+			{
+				var compiler = project.targetFlags.exists("clang") ? "clang" : "gcc";
+				var command = [compiler, "-O3", "-o", executablePath, "-std=c11", "-Wl,-rpath,$ORIGIN", "-I", Path.combine(targetDirectory, "obj"), Path.combine(targetDirectory, "obj/ApplicationMain.c"), "-L", applicationDirectory];
+				for (file in System.readDirectory(applicationDirectory))
+				{
+					switch Path.extension(file)
+					{
+						case "so", "hdll":
+							// ensure the executable knows about every library
+							command.push("-l:" + Path.withoutDirectory(file));
+						default:
+					}
+				}
+				command.push("-lm");
+				System.runCommand("", command.shift(), command);
+			}
 		}
 		else if (targetType == "nodejs")
 		{
@@ -250,8 +287,8 @@ class LinuxPlatform extends PlatformTarget
 		}
 		else
 		{
-			var haxeArgs = [hxml];
-			var flags = [];
+			var haxeArgs:Array<String> = [hxml];
+			var flags:Array<String> = [];
 
 			if (is64)
 			{
@@ -351,7 +388,7 @@ class LinuxPlatform extends PlatformTarget
 
 		context.NEKO_FILE = targetDirectory + "/obj/ApplicationMain.n";
 		context.NODE_FILE = targetDirectory + "/bin/ApplicationMain.js";
-		context.HL_FILE = targetDirectory + "/obj/ApplicationMain.hl";
+		context.HL_FILE = targetDirectory + "/obj/ApplicationMain" + (project.defines.exists("hlc") ? ".c" : ".hl");
 		context.CPP_DIR = targetDirectory + "/obj/";
 		context.BUILD_DIR = project.app.path + "/linux" + (isArm ? "arm" : "") + (is64 ? "64" : "");
 		context.WIN_ALLOW_SHADERS = false;
@@ -363,7 +400,12 @@ class LinuxPlatform extends PlatformTarget
 	{
 		var path = targetDirectory + "/haxe/" + buildType + ".hxml";
 
-		if (FileSystem.exists(path))
+		// try to use the existing .hxml file. however, if the project file was
+		// modified more recently than the .hxml, then the .hxml cannot be
+		// considered valid anymore. it may cause errors in editors like vscode.
+		if (FileSystem.exists(path)
+			&& (project.projectFilePath == null || !FileSystem.exists(project.projectFilePath)
+				|| (FileSystem.stat(path).mtime.getTime() > FileSystem.stat(project.projectFilePath).mtime.getTime())))
 		{
 			return File.getContent(path);
 		}
@@ -392,7 +434,7 @@ class LinuxPlatform extends PlatformTarget
 
 	public override function rebuild():Void
 	{
-		var commands = [];
+		var commands:Array<Array<String>> = [];
 
 		if (targetFlags.exists("hl") && System.hostArchitecture == X64)
 		{
@@ -482,6 +524,11 @@ class LinuxPlatform extends PlatformTarget
 			project.haxeflags.push("-xml " + targetDirectory + "/types.xml");
 		}
 
+		if (project.targetFlags.exists("json"))
+		{
+			project.haxeflags.push("--json " + targetDirectory + "/types.json");
+		}
+
 		var context = generateContext();
 		context.OUTPUT_DIR = targetDirectory;
 
@@ -493,7 +540,7 @@ class LinuxPlatform extends PlatformTarget
 
 				if (ndll.path == null || ndll.path == "")
 				{
-					context.ndlls[i].path = NDLL.getLibraryPath(ndll, "Linux" + (isArm ? "Arm" : "") + (is64 ? "64" : ""), "lib", ".a", project.debug);
+					context.ndlls[i].path = NDLL.getLibraryPath(ndll, "Linux" + (( System.hostArchitecture == ARMV7 || System.hostArchitecture == ARM64) ? "Arm" : "") + (is64 ? "64" : ""), "lib", ".a", project.debug);
 				}
 			}
 		}

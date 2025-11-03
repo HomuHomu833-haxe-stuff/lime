@@ -4432,7 +4432,7 @@ namespace lime {
 
 	#define _ENUM "?"
 	// #define _TCFFIPOINTER _ABSTRACT (HL_CFFIPointer)
-	#define _TAPPLICATION_EVENT _OBJ (_I32 _I32)
+	#define _TAPPLICATION_EVENT _OBJ (_F64 _I32)
 	#define _TBYTES _OBJ (_I32 _BYTES)
 	#define _TCFFIPOINTER _DYN
 	#define _TCLIPBOARD_EVENT _OBJ (_I32)
@@ -4585,7 +4585,7 @@ namespace lime {
 	DEFINE_HL_PRIM (_VOID, hl_system_open_url, _STRING _STRING);
 	DEFINE_HL_PRIM (_BOOL, hl_system_set_allow_screen_timeout, _BOOL);
 	DEFINE_HL_PRIM (_I32, hl_system_get_display_orientation, _I32);
-	DEFINE_HL_PRIM (_VOID, hl_system_get_hint, _STRING);
+	DEFINE_HL_PRIM (_BYTES, hl_system_get_hint, _STRING);
 	DEFINE_HL_PRIM (_BOOL, hl_system_set_windows_console_mode, _I32 _I32);
 	DEFINE_HL_PRIM (_VOID, hl_text_event_manager_register, _FUN (_VOID, _NO_ARG) _TTEXT_EVENT);
 	DEFINE_HL_PRIM (_VOID, hl_touch_event_manager_register, _FUN (_VOID, _NO_ARG) _TTOUCH_EVENT);
