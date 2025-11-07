@@ -495,7 +495,8 @@ public class FileDialog extends Extension
 	{
 		MimeTypeMap mimeType = MimeTypeMap.getSingleton();
 		extension = formatExtension(extension);
-		return mimeType.getMimeTypeFromExtension(extension);
+		String mime = mimeType.getMimeTypeFromExtension(extension);
+		return mime != null ? mime : "*/*";
 	}
 }
 
