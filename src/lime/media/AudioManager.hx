@@ -185,22 +185,22 @@ class AudioManager
 		#if (windows || mac || linux || android || ios)
 		final alConfig:Array<String> = [];
 
-		alConfig.push('[General]');
+		alConfig.push('[general]');
+		alConfig.push('channels=stereo');
 		alConfig.push('sample-type=float32');
 		alConfig.push('stereo-mode=speakers');
+		alConfig.push('stereo-encoding=panpot');
 		alConfig.push('hrtf=false');
 		alConfig.push('cf_level=0');
-		alConfig.push('output-limiter=false');
+		alConfig.push('resampler=fast_bsinc24');
 		alConfig.push('front-stablizer=false');
+		alConfig.push('output-limiter=false');
 		alConfig.push('volume-adjust=0');
 		alConfig.push('period_size=441');
-		alConfig.push('sources=512');
-		alConfig.push('sends=64');
-		alConfig.push('dither=false');
 
 		alConfig.push('[decoder]');
-		alConfig.push('hq-mode=true');
-		alConfig.push('distance-comp=true');
+		alConfig.push('hq-mode=false');
+		alConfig.push('distance-comp=false');
 		alConfig.push('nfc=false');
 
 		try
