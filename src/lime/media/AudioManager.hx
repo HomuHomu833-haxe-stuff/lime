@@ -156,7 +156,7 @@ class AudioManager
 		{
 			var device = new ALDevice(handle);
 
-			MainLoop.runInMainThread(function():Void
+			#if haxe5 haxe.EventLoop.main.run #else MainLoop.runInMainThread #end (function():Void
 			{
 				var alc = context.openal;
 
